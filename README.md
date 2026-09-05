@@ -4,7 +4,7 @@ A clickable, front-end-only prototype for a mobile app that helps people (and th
 caregivers) track meals alongside how they felt afterward, in order to surface
 **personal, self-reported patterns** — not medical predictions.
 
-**[Live demo →](#) <!-- replace with your GitHub Pages URL once enabled -->**
+**[Live demo →](https://alegzandra.github.io/meal-mood-tracker-prototype/) <!-- replace with your GitHub Pages URL once enabled -->**
 
 > This repository contains the interactive UI prototype only. It's a design and UX
 > artifact, not a production app: there's no backend, no real accounts, no real food
