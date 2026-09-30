@@ -1,114 +1,120 @@
-# Meal & Mood Pattern Tracker — Interactive Prototype
+# Autism-Adjacent Wellness App — Prototypes
 
-A clickable, front-end-only prototype for a mobile app that helps people (and their
-caregivers) track meals alongside how they felt afterward, in order to surface
-**personal, self-reported patterns** — not medical predictions.
+Two interactive, front-end-only prototypes exploring meal/mood pattern tracking, built
+around one shared principle:
 
-**[Live demo →](https://alegzandra.github.io/meal-mood-tracker-prototype/) <!-- replace with your GitHub Pages URL once enabled -->**
+> Show people patterns from **their own** logged data, and treat everything the app
+> surfaces as a conversation-starter with a doctor, therapist, or coach — never as a
+> diagnosis, a risk score, or medical advice.
 
-> This repository contains the interactive UI prototype only. It's a design and UX
-> artifact, not a production app: there's no backend, no real accounts, no real food
-> recognition, and no real data storage. Everything is mocked in the browser.
+There is no backend, no real accounts, no real food recognition, and no real data
+storage in either prototype. Everything is mocked in the browser.
 
 ---
 
-## Why this exists
+## 1. Family version — child + caregiver
 
-Early dietary/behavioral pattern research suggests food, sensory state, and mood can be
-loosely linked for some people — but the evidence is early, individual variation is
-large, and there is no validated formula that predicts a specific outcome from a meal.
-This project deliberately does **not** try to be that formula. Instead, it's designed
-around a narrower, more honest premise:
+**[Live demo →](index.html)**
 
-> Let each person build a picture of *their own* patterns, from *their own* logged data,
-> and treat everything the app surfaces as a conversation-starter with a doctor or
-> therapist — never as a diagnosis, a risk score, or medical advice.
-
-That constraint shaped almost every product decision below.
-
-## What's in the prototype
-
-| Screen | What it shows |
-|---|---|
-| **Onboarding** | Account setup that collects date of birth (to drive age-based privacy defaults) and optional, self-reported diagnosis context — explicitly framed as personalization, never assessment |
-| **Log a meal** | Mocked photo → food-recognition flow with editable ingredient chips |
-| **Meal insight** | A plain-language nutrient snapshot and a "personal pattern check" — a match to the user's own historical logs, shown with sample size and confidence, never as a bare score |
-| **Check-in** | Post-meal mood / sensory-comfort / meltdown logging, with a privacy toggle that only appears for adult accounts |
-| **Patterns** | The user's own dashboard of patterns over time, with a visible confidence indicator tied to how much data exists |
-| **Caregiver — Today** | A caregiver's view of the day, including an alert-preferences panel that respects the user's privacy settings |
-| **Caregiver — History** | A day-by-day browser for past logs, with private entries shown as locked rather than hidden or leaked |
-| **Caregiver — Notes** | Shared notes and a provider-facing summary export |
-
-### Screenshots
+A meal/mood tracker built around a young user and their caregiver, with age-based
+privacy: a caregiver sees everything for a minor's account by default, and the user
+gets a per-entry privacy toggle once they turn 18, with caregiver alerts respecting
+that automatically.
 
 <table>
 <tr>
-<td><img src="screenshots/01-onboarding-who.png" width="220"/></td>
-<td><img src="screenshots/05-log-meal.png" width="220"/></td>
-<td><img src="screenshots/07-meal-insight.png" width="220"/></td>
-<td><img src="screenshots/09-meal-insight-pattern-example.png" width="220"/></td>
+<td><img src="screenshots/01-onboarding-who.png" width="200"/></td>
+<td><img src="screenshots/07-meal-insight.png" width="200"/></td>
+<td><img src="screenshots/11-patterns.png" width="200"/></td>
+<td><img src="screenshots/12-caregiver-today.png" width="200"/></td>
 </tr>
 <tr>
 <td align="center">Onboarding</td>
-<td align="center">Log a meal</td>
 <td align="center">Meal insight</td>
-<td align="center">Personal pattern check</td>
-</tr>
-<tr>
-<td><img src="screenshots/11-patterns.png" width="220"/></td>
-<td><img src="screenshots/12-caregiver-today.png" width="220"/></td>
-<td><img src="screenshots/14-caregiver-history-day.png" width="220"/></td>
-<td><img src="screenshots/15-caregiver-notes.png" width="220"/></td>
-</tr>
-<tr>
 <td align="center">Your patterns</td>
 <td align="center">Caregiver: Today</td>
-<td align="center">Caregiver: History</td>
-<td align="center">Caregiver: Notes</td>
 </tr>
 </table>
 
+[See all screenshots →](screenshots/)
+
+## 2. Aria — for autistic adults
+
+**[Live demo →](aria.html)**
+
+A standalone, self-directed version built for autistic adults with lower support
+needs. The centerpiece is Aria, a conversational assistant: tell it what you ate, what
+supplement you took, or how you're feeling — in plain text or by photo — and it logs
+it for you. It also proactively nudges ("did you drink water?", "time to stretch") and
+surfaces patterns directly in the conversation.
+
+<table>
+<tr>
+<td><img src="screenshots-aria/05-assistant-chat.png" width="200"/></td>
+<td><img src="screenshots-aria/09-insight.png" width="200"/></td>
+<td><img src="screenshots-aria/11-patterns.png" width="200"/></td>
+<td><img src="screenshots-aria/12-coaches.png" width="200"/></td>
+</tr>
+<tr>
+<td align="center">Aria (chat)</td>
+<td align="center">Meal insight</td>
+<td align="center">Your patterns</td>
+<td align="center">Find a coach</td>
+</tr>
+</table>
+
+[See all screenshots →](screenshots-aria/)
+
+### What's different about Aria
+
+- **No caregiver role.** The user is the only account — self-directed, self-reported.
+- **Conversational logging first.** Manual forms (the Log tab) still exist as a
+  fallback, but the primary interaction is talking to Aria.
+- **Supplements are tracked alongside meals**, since diet isn't the only variable that
+  plausibly matters for this audience.
+- **A coach directory**, with an optional, clearly-labeled self-reflection screener to
+  help someone figure out whether reaching out to a coach might be useful. The
+  screener is illustrative only — a real version would use a properly validated,
+  licensed instrument, administered with appropriate guidance on interpreting results.
+- **No onboarding "diagnosis quiz."** Account setup asks about existing,
+  professionally-made diagnoses (self-reported) — it does not attempt to assess or
+  score autism traits or support needs itself. Support-level classification is a
+  clinical judgment made by a qualified professional through interview and
+  observation; no self-report tool, however well designed, can substitute for that.
+
 ## Design decisions worth calling out
 
-A few choices here were deliberate, not defaults — worth reading if you're evaluating
-the product thinking rather than just the pixels:
-
-- **"Pattern," never "risk" or "prediction."** Every surface avoids diagnostic or
-  predictive medical language on purpose. Software that predicts or informs prognosis of
-  a health condition can fall under EU MDR (medical device) regulation depending on its
-  intended purpose — this app is scoped and worded to stay a personal-analytics tool,
-  not a diagnostic one.
-- **Age-aware privacy, not a blanket rule.** Caregivers see everything for a minor's
-  account by default; once an account turns 18, the user gets a per-entry privacy toggle
-  and caregiver alerts automatically respect it.
-- **Confidence is shown, not hidden.** Every pattern the app surfaces is paired with how
-  much data it's based on, so a 2-data-point coincidence doesn't read the same as an
+- **"Pattern," never "risk" or "prediction."** Both prototypes avoid diagnostic or
+  predictive medical language throughout — in the UI copy and in the underlying code
+  (class names, IDs, function names), so there's no mismatch between what's shown and
+  what's built. Software that predicts or informs prognosis of a health condition can
+  fall under EU MDR (medical device) regulation depending on its intended purpose —
+  both prototypes are scoped and worded to stay personal-analytics tools, not
+  diagnostic ones.
+- **Confidence is shown, not hidden.** Every pattern surfaced is paired with how much
+  data it's based on, so a 2-data-point coincidence doesn't read the same as an
   18-data-point trend.
-- **No onboarding "diagnosis quiz."** The account setup asks about existing,
-  professionally-made diagnoses (self-reported) — it does not attempt to assess or score
-  autism traits itself. That's a clinical judgment, not something a quiz can validly
-  produce.
 
 ## Tech
 
-Single self-contained `index.html` — no build step, no dependencies, no backend.
-Vanilla HTML/CSS/JS, styled with CSS custom properties. Open it directly in a browser,
-or serve the repo with GitHub Pages.
+Two self-contained HTML files — `index.html` and `aria.html` — no build step, no
+dependencies, no backend. Vanilla HTML/CSS/JS, styled with CSS custom properties.
 
 ```bash
 git clone <this-repo-url>
 cd <repo>
-open index.html   # or just double-click it
+open index.html   # family + caregiver version
+open aria.html     # Aria, for autistic adults
 ```
 
 ## Status & roadmap
 
-This is a **design prototype**, built to validate the UX and product framing before
+These are **design prototypes**, built to validate UX and product framing before
 engineering the real thing. Not included here (by design — this is the part that stays
 private pre-launch): the real backend, real food-recognition API integration, the
-personal-pattern scoring model, and push notifications.
+personal-pattern scoring model, push notifications, and coach verification/booking.
 
 ## License
 
-See [LICENSE](LICENSE) — all rights reserved. This is shared publicly for portfolio and
-demonstration purposes; it isn't licensed for reuse.
+See [LICENSE](LICENSE) — all rights reserved. Shared publicly for portfolio and
+demonstration purposes; not licensed for reuse.
