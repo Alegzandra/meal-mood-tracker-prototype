@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aria — day-to-day support for autistic adults</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root{
+    --bg: #EEF2F0;
+    --surface: #FFFFFF;
+    --surface-2: #F5F7F5;
+    --ink: #22302B;
+    --ink-soft: #5B6B65;
+    --ink-faint: #8B9994;
+    --teal: #3F7268;
+    --teal-soft: #E4EEEC;
+    --ochre: #B9843F;
+    --ochre-soft: #F6EBDB;
+    --plum: #7A6389;
+    --plum-soft: #EFEAF2;
+    --line: #DCE3E0;
+    --radius-frame: 34px;
+    --radius-card: 16px;
+    --radius-pill: 999px;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: var(--bg); font-family: 'Manrope', -apple-system, sans-serif; color: var(--ink);
+    padding: 32px 12px;
+  }
+
+  .stage{ display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .stage-label{ font-size: 13px; color: var(--ink-faint); }
+
+  .phone{
+    width: 390px; max-width: 92vw; height: 760px; max-height: 88vh;
+    background: var(--surface); border-radius: var(--radius-frame); border: 1px solid var(--line);
+    box-shadow: 0 24px 60px -20px rgba(34, 48, 43, 0.28);
+    overflow: hidden; display: flex; flex-direction: column; position: relative;
+  }
+
+  /* ---- top bar ---- */
+  .topbar{
+    padding: 18px 18px 14px; background: var(--surface); border-bottom: 1px solid var(--line);
+    flex-shrink: 0; display: flex; align-items: center; gap: 10px;
+  }
+  .topbar .mark{
+    width: 34px; height: 34px; border-radius: 10px; background: var(--teal);
+    display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+  }
+  .topbar h2{ font-size: 15px; margin: 0; font-weight: 800; }
+  .topbar p{ font-size: 11.5px; margin: 1px 0 0; color: var(--ink-faint); }
+
+  /* ---- content ---- */
+  .screen{ flex: 1; overflow-y: auto; padding: 20px 18px 90px; position: relative; }
+  .screen.no-pad{ padding: 0; overflow: hidden; }
+  .screen.chat-screen{ padding: 16px 0 0; display: flex; flex-direction: column; }
+  .screen::-webkit-scrollbar{ width: 0; }
+
+  .panel{ display: none; }
+  .panel.active{ display: block; animation: rise 0.3s ease; }
+  .panel.active.chat-active{ display: flex; flex-direction: column; position: absolute; top: 0; left: 0; right: 0; bottom: 78px; background: var(--surface); }
+
+  @keyframes rise{ from{ opacity: 0; transform: translateY(6px); } to{ opacity: 1; transform: translateY(0); } }
+
+  h1.screen-title{ font-size: 22px; font-weight: 800; margin: 4px 0 3px; letter-spacing: -0.01em; }
+  p.screen-sub{ font-size: 13.5px; color: var(--ink-soft); margin: 0 0 20px; line-height: 1.5; }
+
+  .card{ background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-card); padding: 16px; margin-bottom: 14px; }
+  .card h3{ font-size: 14.5px; font-weight: 700; margin: 0 0 6px; }
+  .card p{ font-size: 13px; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+
+  .photo-well{
+    border: 1.5px dashed var(--line); border-radius: var(--radius-card); padding: 28px 16px; text-align: center;
+    background: var(--surface-2); cursor: pointer; transition: border-color 0.2s ease, background 0.2s ease;
+  }
+  .photo-well:hover{ border-color: var(--teal); background: var(--teal-soft); }
+  .photo-well .icon{ font-size: 24px; margin-bottom: 8px; display:block; }
+  .photo-well .label{ font-size: 13.5px; font-weight: 600; }
+  .photo-well .hint{ font-size: 12px; color: var(--ink-faint); margin-top: 3px; }
+
+  .photo-result{ display: none; }
+  .photo-result.show{ display: block; animation: rise 0.3s ease; }
+  .thumb-preview{
+    width: 100%; height: 120px; border-radius: var(--radius-card);
+    background: linear-gradient(135deg, #E7D9BE, #C9A876); margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center; font-size: 32px;
+  }
+
+  .chip-row{ display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+  .chip{ background: var(--teal-soft); color: var(--teal); font-size: 12.5px; font-weight: 600; padding: 7px 12px; border-radius: var(--radius-pill); display: flex; align-items: center; gap: 6px; }
+  .chip button{ border: none; background: none; color: var(--teal); font-size: 13px; cursor: pointer; line-height: 1; opacity: 0.6; }
+  .chip.add{ background: transparent; border: 1px dashed var(--ink-faint); color: var(--ink-soft); }
+
+  .field-label{ font-size: 12.5px; font-weight: 700; color: var(--ink-soft); margin: 18px 0 8px; }
+
+  .seg{ display: flex; gap: 6px; flex-wrap: wrap; }
+  .seg button{ flex: 1; min-width: 70px; padding: 9px 6px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font-family: inherit; font-size: 12.5px; font-weight: 600; color: var(--ink-soft); cursor: pointer; }
+  .seg button.sel{ border-color: var(--teal); background: var(--teal-soft); color: var(--teal); }
+
+  .btn-primary{ width: 100%; margin-top: 22px; padding: 14px; border-radius: 12px; border: none; background: var(--teal); color: #fff; font-family: inherit; font-size: 14.5px; font-weight: 700; cursor: pointer; }
+
+  .toast{
+    position: absolute; bottom: 84px; left: 18px; right: 18px; background: var(--ink); color: #fff;
+    padding: 12px 16px; border-radius: 12px; font-size: 13px; text-align: center; opacity: 0; pointer-events: none;
+    transform: translateY(6px); transition: opacity 0.25s ease, transform 0.25s ease; z-index: 20;
+  }
+  .toast.show{ opacity: 1; transform: translateY(0); }
+
+  textarea.note{ width: 100%; border: 1px solid var(--line); border-radius: 12px; padding: 12px; font-family: inherit; font-size: 13px; color: var(--ink); resize: none; height: 62px; }
+  textarea.note:focus{ outline: none; border-color: var(--teal); }
+
+  .disclaimer{ background: var(--surface-2); border-left: 3px solid var(--ink-faint); border-radius: 8px; padding: 11px 13px; font-size: 12px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 18px; }
+
+  .confidence{ display: flex; align-items: center; gap: 6px; margin-top: 8px; }
+  .confidence .dot{ width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+  .confidence .dot.on{ background: var(--teal); }
+  .confidence .label{ font-size: 11px; color: var(--ink-faint); margin-left: 4px; }
+
+  .pattern-card{ border-left: 3px solid var(--teal); }
+  .pattern-card.flag{ border-left-color: var(--ochre); }
+  .flag-badge{ display: inline-block; background: var(--ochre-soft); color: var(--ochre); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: var(--radius-pill); margin-bottom: 8px; }
+
+  .timeline-row{ display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+  .timeline-row:last-child{ border-bottom: none; }
+  .timeline-time{ font-size: 11.5px; color: var(--ink-faint); width: 44px; flex-shrink: 0; padding-top: 2px; }
+  .timeline-body .t-title{ font-size: 13px; font-weight: 700; }
+  .timeline-body .t-sub{ font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
+  .pattern-badge{ display: inline-block; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: var(--radius-pill); margin: 12px 0 8px; }
+  .pattern-badge.low{ background: var(--teal-soft); color: var(--teal); }
+  .pattern-badge.moderate{ background: var(--ochre-soft); color: var(--ochre); }
+  .pattern-badge.elevated{ background: #F5DDD3; color: #A05230; }
+  .pattern-based-on{ display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .pattern-chip{ font-size: 11px; color: var(--ink-soft); background: var(--surface-2); padding: 5px 10px; border-radius: var(--radius-pill); }
+
+  .nutrient-row{ margin-bottom: 12px; }
+  .nutrient-row:last-child{ margin-bottom: 0; }
+  .nutrient-label{ display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-soft); margin-bottom: 5px; }
+  .nutrient-track{ height: 7px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+  .nutrient-fill{ height: 100%; border-radius: 999px; background: var(--teal); }
+
+  /* ---- onboarding ---- */
+  .onboarding{ position: absolute; inset: 0; background: var(--surface); z-index: 30; display: flex; flex-direction: column; }
+  .ob-body{ flex: 1; overflow-y: auto; padding: 32px 22px 24px; }
+  .ob-step{ display: none; }
+  .ob-step.active{ display: block; animation: rise 0.3s ease; }
+  .ob-eyebrow{ font-size: 12px; color: var(--ink-faint); margin: 0 0 6px; }
+  .ob-title{ font-size: 21px; font-weight: 800; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .ob-sub{ font-size: 13.5px; color: var(--ink-soft); line-height: 1.55; margin: 0 0 22px; }
+  .ob-option{ width: 100%; text-align: left; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--ink); cursor: pointer; margin-bottom: 10px; }
+  .ob-option .ob-opt-sub{ font-size: 11.5px; font-weight: 500; color: var(--ink-faint); margin-top: 2px; }
+  .ob-option.sel{ border-color: var(--teal); background: var(--teal-soft); }
+  .ob-footer{ padding: 16px 22px 26px; display: flex; gap: 10px; }
+  .ob-back{ padding: 13px 18px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font-family: inherit; font-weight: 700; font-size: 13.5px; color: var(--ink-soft); cursor: pointer; }
+  .ob-next{ flex: 1; padding: 13px; border-radius: 12px; border: none; background: var(--teal); color: #fff; font-family: inherit; font-weight: 700; font-size: 13.5px; cursor: pointer; }
+  .ob-next:disabled{ opacity: 0.45; cursor: not-allowed; }
+  .ob-skip{ background: none; border: none; color: var(--ink-faint); font-family: inherit; font-size: 12.5px; text-decoration: underline; cursor: pointer; padding: 0; margin-top: 4px; }
+  .ob-dots{ display: flex; gap: 5px; justify-content: center; padding-top: 10px; }
+  .ob-dots span{ width: 6px; height: 6px; border-radius: 50%; background: var(--line); }
+  .ob-dots span.on{ background: var(--teal); }
+
+  /* ---- coaches / screener ---- */
+  .day-picker{ display: flex; gap: 6px; margin-bottom: 14px; }
+
+  /* ---- chat (assistant) ---- */
+  .chat-log{ flex: 1; overflow-y: auto; padding: 6px 18px 14px; display: flex; flex-direction: column; gap: 12px; }
+  .chat-log::-webkit-scrollbar{ width: 0; }
+  .msg{ max-width: 82%; padding: 11px 14px; border-radius: 16px; font-size: 13.5px; line-height: 1.5; }
+  .msg.bot{ align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 4px; }
+  .msg.user{ align-self: flex-end; background: var(--teal); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.system{ align-self: center; background: var(--teal-soft); color: var(--teal); font-size: 11.5px; font-weight: 700; padding: 6px 12px; border-radius: var(--radius-pill); }
+  .msg.nudge{ align-self: flex-start; background: var(--ochre-soft); color: #7A5A2E; border-bottom-left-radius: 4px; }
+  .msg-time{ font-size: 10px; color: var(--ink-faint); margin-top: 4px; }
+  .msg.user .msg-time{ color: rgba(255,255,255,0.7); text-align: right; }
+  .msg-cta{ display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--teal); background: #fff; border: 1px solid var(--teal); padding: 6px 12px; border-radius: var(--radius-pill); cursor: pointer; }
+
+  .quick-replies{ display: flex; gap: 7px; padding: 0 18px 10px; overflow-x: auto; flex-shrink: 0; }
+  .quick-replies::-webkit-scrollbar{ height: 0; }
+  .qr-chip{ white-space: nowrap; font-size: 12px; font-weight: 600; color: var(--teal); background: var(--teal-soft); border: none; padding: 8px 13px; border-radius: var(--radius-pill); cursor: pointer; flex-shrink: 0; }
+
+  .chat-input-bar{ display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--line); flex-shrink: 0; background: var(--surface); }
+  .chat-icon-btn{ width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface-2); font-size: 16px; cursor: pointer; flex-shrink: 0; }
+  .chat-input-bar input{ flex: 1; border: 1px solid var(--line); border-radius: var(--radius-pill); padding: 10px 15px; font-family: inherit; font-size: 13.5px; }
+  .chat-input-bar input:focus{ outline: none; border-color: var(--teal); }
+  .chat-send{ width: 38px; height: 38px; border-radius: 50%; border: none; background: var(--teal); color: #fff; font-size: 15px; cursor: pointer; flex-shrink: 0; }
+
+  /* ---- tab bar ---- */
+  .tabbar{ position: absolute; bottom: 0; left: 0; right: 0; display: flex; background: var(--surface); border-top: 1px solid var(--line); padding: 10px 6px calc(14px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -6px 18px -12px rgba(34,48,43,0.2); }
+  .tab{ flex: 1; background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; font-family: inherit; color: var(--ink-faint); padding: 4px 2px; }
+  .tab .ic{ font-size: 17px; }
+  .tab .lb{ font-size: 10px; font-weight: 700; }
+  .tab.active{ color: var(--teal); }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="stage-label">Aria — prototype · tap around to explore</div>
+  <div class="phone" id="phone">
+
+    <div class="onboarding" id="onboarding">
+      <div class="ob-body">
+
+        <div class="ob-step active" data-step="1">
+          <p class="ob-eyebrow">Welcome</p>
+          <h1 class="ob-title">Hi, I'm Aria</h1>
+          <p class="ob-sub">Built for autistic adults with lower support needs. I help you log meals and supplements, check in on how you're feeling, and notice patterns in your own data over time — day to day, in plain conversation.</p>
+          <button class="ob-option sel" onclick="document.getElementById('obNext').disabled=false;">Let's get started</button>
+        </div>
+
+        <div class="ob-step" data-step="2">
+          <p class="ob-eyebrow">Step 2 of 3</p>
+          <h1 class="ob-title">A bit about you</h1>
+          <p class="ob-sub">Optional, and never used to diagnose anything — just to personalize how I talk with you.</p>
+          <button class="ob-option" data-group="ctx" onclick="obSelect(this)">I'm formally diagnosed</button>
+          <button class="ob-option" data-group="ctx" onclick="obSelect(this)">I'm currently being evaluated</button>
+          <button class="ob-option" data-group="ctx" onclick="obSelect(this)">Not diagnosed, but this feels relevant to me</button>
+          <button class="ob-option" data-group="ctx" onclick="obSelect(this)">Prefer not to say</button>
+        </div>
+
+        <div class="ob-step" data-step="3">
+          <p class="ob-eyebrow">Step 3 of 3</p>
+          <h1 class="ob-title">A short self-reflection</h1>
+          <p class="ob-sub">Totally optional. This gives you a general sense of things — it can't tell you a diagnosis or a support level. Only a professional evaluation can do that.</p>
+
+          <div id="obScreenerQs">
+            <p class="field-label" style="margin-top:0;">I find it easy to switch between tasks without losing focus</p>
+            <div class="seg"><button data-q="1">Agree</button><button data-q="1">Neutral</button><button class="sel" data-q="1">Disagree</button></div>
+            <p class="field-label">Loud or crowded places rarely bother me</p>
+            <div class="seg"><button data-q="2">Agree</button><button data-q="2">Neutral</button><button class="sel" data-q="2">Disagree</button></div>
+          </div>
+
+          <button class="ob-skip" onclick="skipScreener()">Skip this for now</button>
+
+          <div id="obScreenerResult" style="display:none; margin-top:16px;">
+            <div class="card pattern-card">
+              <span class="flag-badge">Several traits noted</span>
+              <h3>Worth exploring further</h3>
+              <p>This is a general reflection, not a clinical result. You can revisit this anytime, or talk to a coach about it, under the Coaches tab.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="ob-footer">
+        <button class="ob-back" id="obBack" style="display:none;" onclick="obGo(-1)">Back</button>
+        <button class="ob-next" id="obNext" onclick="obGo(1)">Continue</button>
+      </div>
+      <div class="ob-dots" id="obDots"><span class="on"></span><span></span><span></span></div>
+    </div>
+
+    <div class="topbar">
+      <div class="mark">🌿</div>
+      <div>
+        <h2 id="topbarTitle">Aria</h2>
+        <p id="topbarSub">Your day-to-day companion</p>
+      </div>
+    </div>
+
+    <div class="screen no-pad" id="screenWrap">
+
+      <!-- ============ ASSISTANT (CHAT) ============ -->
+      <div class="panel active chat-active" data-panel="assistant" style="display:flex;">
+        <div class="chat-log" id="chatLog">
+
+          <div class="msg system">Today, 8:02 AM</div>
+
+          <div class="msg bot">Good morning! How are you feeling today?<div class="msg-time">8:02a</div></div>
+          <div class="msg user">a bit anxious, slept badly<div class="msg-time">8:03a</div></div>
+          <div class="msg system">Logged: anxious, poor sleep · 8:03a</div>
+
+          <div class="msg bot">Thanks for telling me. I've got it logged. What did you have for breakfast, if anything?<div class="msg-time">8:03a</div></div>
+          <div class="msg user">oatmeal with banana<div class="msg-time">8:14a</div></div>
+          <div class="msg bot">Got it — logged oatmeal and banana. Want a quick nutrition read on that? <span class="msg-cta" onclick="setPanel('insight')">View insight</span><div class="msg-time">8:14a</div></div>
+
+          <div class="msg user">also took my vitamin D and magnesium<div class="msg-time">8:15a</div></div>
+          <div class="msg bot">Logged 2 supplements: vitamin D, magnesium. I'll start tracking these alongside meals to see if anything lines up over time.<div class="msg-time">8:15a</div></div>
+
+          <div class="msg nudge">Just checking in 💧 — have you had water in the last couple hours?<div class="msg-time">11:20a</div></div>
+          <div class="msg nudge">Quick reminder to stretch and take a deep breath, if you have a sec 🌿<div class="msg-time">1:45p</div></div>
+
+          <div class="msg bot">Heads up — I noticed something. Afternoons after dairy-heavy meals have lined up with more "overwhelmed" check-ins in your logs, 5 of 7 times. Not a certainty, just a pattern I'm seeing — want the details? <span class="msg-cta" onclick="setPanel('patterns')">View pattern</span><div class="msg-time">2:10p</div></div>
+
+        </div>
+
+        <div class="quick-replies">
+          <button class="qr-chip" onclick="quickReply('Log a meal')">🍽️ Log a meal</button>
+          <button class="qr-chip" onclick="quickReply('📷 Send a photo')">📷 Send a photo</button>
+          <button class="qr-chip" onclick="quickReply(&quot;I'm feeling...&quot;)">💬 I'm feeling...</button>
+          <button class="qr-chip" onclick="quickReply('Log a supplement')">💊 Log a supplement</button>
+        </div>
+        <div class="chat-input-bar">
+          <button class="chat-icon-btn" onclick="quickReply('📷 Send a photo')">📷</button>
+          <input type="text" id="chatInput" placeholder="Tell Aria anything...">
+          <button class="chat-send" onclick="sendChat()">➤</button>
+        </div>
+      </div>
+
+      <!-- ============ LOG ============ -->
+      <div class="panel" data-panel="log">
+        <h1 class="screen-title">Log</h1>
+        <p class="screen-sub">You can also just tell Aria what you ate or took — this works the same way.</p>
+
+        <p class="field-label" style="margin-top:0;">What are you logging?</p>
+        <div class="seg" id="logTypeToggle">
+          <button class="sel" data-type="meal">Meal</button>
+          <button data-type="supplement">Supplement</button>
+        </div>
+
+        <div id="mealLogBlock" style="margin-top:16px;">
+          <div class="photo-well" id="photoWell" onclick="addPhoto()">
+            <span class="icon">📷</span>
+            <span class="label">Add a photo</span>
+            <span class="hint">or type it in instead</span>
+          </div>
+
+          <div class="photo-result" id="photoResult">
+            <div class="thumb-preview">🍛</div>
+            <div class="chip-row" id="chipRow">
+              <span class="chip">Grilled chicken <button onclick="removeChip(this)">×</button></span>
+              <span class="chip">White rice <button onclick="removeChip(this)">×</button></span>
+              <span class="chip">Steamed broccoli <button onclick="removeChip(this)">×</button></span>
+              <span class="chip add" onclick="addChip()">+ Add item</span>
+            </div>
+            <p class="field-label">Meal</p>
+            <div class="seg">
+              <button class="sel">Lunch</button><button>Breakfast</button><button>Dinner</button><button>Snack</button>
+            </div>
+            <button class="btn-primary" onclick="saveMeal()">Save meal</button>
+          </div>
+        </div>
+
+        <div id="supplementLogBlock" style="display:none; margin-top:16px;">
+          <p class="field-label" style="margin-top:0;">Supplement name</p>
+          <input class="ob-input" style="width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--line); font-family:inherit; font-size:14px;" placeholder="e.g. Magnesium glycinate" value="Magnesium">
+          <p class="field-label">Dose</p>
+          <input class="ob-input" style="width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--line); font-family:inherit; font-size:14px;" placeholder="e.g. 200mg" value="200mg">
+          <button class="btn-primary" onclick="showToast('Supplement logged.')">Save supplement</button>
+        </div>
+      </div>
+
+      <!-- ============ INSIGHT ============ -->
+      <div class="panel" data-panel="insight">
+        <h1 class="screen-title">Meal insight</h1>
+        <p class="screen-sub">Lunch · logged 12:05p — chicken, rice, broccoli</p>
+
+        <div class="card">
+          <span class="pattern-badge low" style="margin-top:0;">Balanced meal</span>
+          <h3>Good mix of protein, veg, and a moderate carb portion</h3>
+          <p>Lean protein plus a vegetable, without much refined sugar or heavily processed ingredients — a solid everyday choice.</p>
+        </div>
+
+        <div class="card">
+          <h3>Rough nutrient snapshot</h3>
+          <p style="margin-bottom: 14px;">Estimated from what was recognized — a general guide, not exact values.</p>
+          <div class="nutrient-row"><div class="nutrient-label"><span>Protein</span><span>High</span></div><div class="nutrient-track"><div class="nutrient-fill" style="width:80%;"></div></div></div>
+          <div class="nutrient-row"><div class="nutrient-label"><span>Carbohydrates</span><span>Moderate</span></div><div class="nutrient-track"><div class="nutrient-fill" style="width:55%; background: var(--ochre);"></div></div></div>
+          <div class="nutrient-row"><div class="nutrient-label"><span>Fat</span><span>Moderate</span></div><div class="nutrient-track"><div class="nutrient-fill" style="width:38%; background: var(--plum);"></div></div></div>
+          <div class="nutrient-row"><div class="nutrient-label"><span>Fiber</span><span>Moderate</span></div><div class="nutrient-track"><div class="nutrient-fill" style="width:50%;"></div></div></div>
+        </div>
+
+        <div class="card">
+          <h3>Personal pattern check</h3>
+          <p style="margin-bottom: 12px;">A pattern from your own logs — not a diagnosis or medical prediction.</p>
+          <div class="seg" id="patternToggle">
+            <button class="sel" data-pattern="low">This meal</button>
+            <button data-pattern="high">Example: dairy dinner</button>
+          </div>
+          <div id="patternContent"></div>
+        </div>
+
+        <div class="card pattern-card">
+          <h3>Magnesium days trend calmer</h3>
+          <p>On days you've logged magnesium, evening check-ins came back "calm" 9 times out of 11 — one of the steadier patterns in your data so far.</p>
+        </div>
+
+        <div class="disclaimer">
+          This is a general estimate based on recognized ingredients — not a clinical nutrition assessment. For allergies, medical conditions, or specific needs, check with a doctor or dietitian.
+        </div>
+      </div>
+
+      <!-- ============ PATTERNS ============ -->
+      <div class="panel" data-panel="patterns">
+        <h1 class="screen-title">Your patterns</h1>
+        <p class="screen-sub">Built from what you've logged — not a diagnosis.</p>
+
+        <div class="disclaimer">
+          These patterns come only from your own logs and get more reliable the more you log. They're a starting point for conversations with a doctor, therapist, or coach — not medical advice.
+        </div>
+
+        <div class="card">
+          <h3>18 meals · 12 check-ins · 9 supplement logs this month</h3>
+          <div class="confidence"><div class="dot on"></div><div class="dot on"></div><div class="dot"></div><div class="dot"></div><span class="label">Building — early pattern</span></div>
+        </div>
+
+        <div class="card pattern-card flag">
+          <span class="flag-badge">Worth watching</span>
+          <h3>Overwhelmed check-ins more common within 3 hrs of dairy</h3>
+          <p>Seen in 5 of your last 7 dairy meals. Still a small sample — keep logging to see if it holds.</p>
+        </div>
+
+        <div class="card pattern-card">
+          <h3>Magnesium days trend calmer</h3>
+          <p>Evening check-ins came back "calm" 9 of 11 times on days you logged magnesium.</p>
+        </div>
+
+        <div class="card pattern-card">
+          <h3>Calmer afternoons after protein-heavy lunches</h3>
+          <p>Your "calm" sensory check-ins were more common after lunches with chicken, eggs, or fish.</p>
+        </div>
+
+        <p class="field-label" style="margin-top:22px;">Recent activity</p>
+        <div class="card" style="padding: 4px 16px;">
+          <div class="timeline-row"><div class="timeline-time">1:40p</div><div class="timeline-body"><div class="t-title">Check-in · Okay, wound up</div><div class="t-sub">After lunch, via Aria</div></div></div>
+          <div class="timeline-row"><div class="timeline-time">12:05p</div><div class="timeline-body"><div class="t-title">Lunch logged</div><div class="t-sub">Chicken, rice, broccoli</div></div></div>
+          <div class="timeline-row"><div class="timeline-time">8:15a</div><div class="timeline-body"><div class="t-title">Supplements logged</div><div class="t-sub">Vitamin D, magnesium — via Aria</div></div></div>
+        </div>
+      </div>
+
+      <!-- ============ COACHES ============ -->
+      <div class="panel" data-panel="coaches">
+        <h1 class="screen-title">Find a coach</h1>
+        <p class="screen-sub">Independent coaches who specialize in supporting autistic adults.</p>
+
+        <div class="card">
+          <h3>Not sure where to start?</h3>
+          <p>A short self-reflection screener can point you in a direction — it's not a diagnosis or a severity assessment, just a starting point.</p>
+          <button class="btn-primary" style="margin-top:12px;" id="startScreenerBtn" onclick="toggleScreener()">Take the 2-minute screener</button>
+
+          <div id="screenerBlock" style="display:none; margin-top:18px;">
+            <div class="disclaimer" style="margin-bottom:16px;">This reflects general traits some autistic adults report — it cannot determine a diagnosis or how much support you need. Only a qualified professional evaluation can do that.</div>
+            <p class="field-label" style="margin-top:0;">I pick up on unspoken social cues without much effort</p>
+            <div class="seg"><button class="sel" data-q="3">Agree</button><button data-q="3">Neutral</button><button data-q="3">Disagree</button></div>
+            <button class="btn-primary" onclick="showScreenerResult()">See what this suggests</button>
+            <div id="screenerResult" style="display:none; margin-top:16px;">
+              <div class="card pattern-card">
+                <span class="flag-badge">Several traits noted</span>
+                <h3>Worth exploring further</h3>
+                <p>Your answers touch on patterns some autistic adults describe. This is only a general reflection, not a clinical result — a coach can help you think it through, or you can look into a formal evaluation.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="field-label" style="margin-top:22px;">Browse by specialty</p>
+        <div class="seg" id="coachFilter">
+          <button class="sel" data-spec="all">All</button>
+          <button data-spec="exec">Executive function</button>
+          <button data-spec="sensory">Sensory</button>
+          <button data-spec="work">Workplace</button>
+        </div>
+
+        <div class="card" style="margin-top:14px;">
+          <h3>Priya Nandakumar <span style="font-weight:500; color: var(--ochre); font-size:12px;">★★★★★</span></h3>
+          <p>Certified autism coach · Executive function, routines · 6 yrs experience</p>
+          <button class="btn-primary" style="margin-top:10px;" onclick="showToast('Profile preview — not wired up in this prototype.')">View profile</button>
+        </div>
+        <div class="card">
+          <h3>Marcus Ellery <span style="font-weight:500; color: var(--ochre); font-size:12px;">★★★★☆</span></h3>
+          <p>Certified autism coach · Sensory regulation, burnout · 4 yrs experience</p>
+          <button class="btn-primary" style="margin-top:10px;" onclick="showToast('Profile preview — not wired up in this prototype.')">View profile</button>
+        </div>
+        <div class="card">
+          <h3>Dana Okafor <span style="font-weight:500; color: var(--ochre); font-size:12px;">★★★★★</span></h3>
+          <p>Certified autism coach · Workplace accommodations, disclosure · 8 yrs experience</p>
+          <button class="btn-primary" style="margin-top:10px;" onclick="showToast('Profile preview — not wired up in this prototype.')">View profile</button>
+        </div>
+
+        <div class="disclaimer">
+          Coaches are independent professionals, not clinicians or employees of this app. Coaching isn't medical or psychiatric treatment. We verify stated credentials but can't guarantee outcomes.
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tabbar" id="tabbar">
+      <button class="tab active" data-panel="assistant"><span class="ic">🤖</span><span class="lb">Aria</span></button>
+      <button class="tab" data-panel="log"><span class="ic">🍽️</span><span class="lb">Log</span></button>
+      <button class="tab" data-panel="insight"><span class="ic">🔍</span><span class="lb">Insight</span></button>
+      <button class="tab" data-panel="patterns"><span class="ic">📈</span><span class="lb">Patterns</span></button>
+      <button class="tab" data-panel="coaches"><span class="ic">🧑‍🏫</span><span class="lb">Coaches</span></button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+  </div>
+</div>
+
+<script>
+  const phone = document.getElementById('phone');
+
+  function setPanel(name){
+    document.getElementById('screenWrap').classList.toggle('no-pad', name === 'assistant');
+    document.querySelectorAll('.panel').forEach(p => {
+      const active = p.dataset.panel === name;
+      p.classList.toggle('active', active);
+      if(p.dataset.panel === 'assistant'){
+        p.style.display = active ? 'flex' : 'none';
+      }
+    });
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.panel === name));
+    const topbarTitle = document.getElementById('topbarTitle');
+    const topbarSub = document.getElementById('topbarSub');
+    const titles = {
+      assistant: ['Aria', 'Your day-to-day companion'],
+      log: ['Log', 'Meals and supplements'],
+      insight: ['Insight', 'What this meal means for you'],
+      patterns: ['Your patterns', 'Built from your own logs'],
+      coaches: ['Coaches', 'Specialized support, on your terms'],
+    };
+    if(titles[name]){
+      topbarTitle.textContent = titles[name][0];
+      topbarSub.textContent = titles[name][1];
+    }
+  }
+
+  document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => setPanel(tab.dataset.panel)));
+
+  document.querySelectorAll('.seg').forEach(group => {
+    group.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if(!btn || group.id === 'logTypeToggle') return;
+      group.querySelectorAll('button').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+    });
+  });
+
+  // log type toggle (meal / supplement)
+  document.getElementById('logTypeToggle').addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if(!btn) return;
+    document.querySelectorAll('#logTypeToggle button').forEach(b => b.classList.toggle('sel', b === btn));
+    const isMeal = btn.dataset.type === 'meal';
+    document.getElementById('mealLogBlock').style.display = isMeal ? 'block' : 'none';
+    document.getElementById('supplementLogBlock').style.display = isMeal ? 'none' : 'block';
+  });
+
+  function addPhoto(){
+    document.getElementById('photoWell').style.display = 'none';
+    document.getElementById('photoResult').classList.add('show');
+  }
+  function removeChip(btn){ btn.closest('.chip').remove(); }
+  let extraChipCount = 0;
+  const extras = ['Sourdough toast', 'Sliced apple', 'Whole milk', 'Roasted carrots', 'Peanut butter'];
+  function addChip(){
+    const name = extras[extraChipCount % extras.length]; extraChipCount++;
+    const addChipEl = document.querySelector('.chip.add');
+    const newChip = document.createElement('span');
+    newChip.className = 'chip';
+    newChip.innerHTML = name + ' <button onclick="removeChip(this)">×</button>';
+    addChipEl.parentNode.insertBefore(newChip, addChipEl);
+  }
+  function saveMeal(){
+    showToast("Meal logged. Here's what we found.");
+    setTimeout(() => setPanel('insight'), 700);
+  }
+
+  let toastTimer;
+  function showToast(msg){
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  // personal pattern check (Insight tab)
+  const patternExamples = {
+    low: { badge: 'low', label: 'Low match', headline: 'Little overlap with your rough-day meals',
+      body: 'In your logs, 2 of 15 meals with this kind of profile (protein, veg, moderate carbs) were followed by a rough afternoon within 3 hours.',
+      chips: ['Based on 15 similar meals', 'Confidence: building'] },
+    high: { badge: 'elevated', label: 'Elevated match', headline: 'Overlaps with several of your rougher days',
+      body: 'In your logs, 5 of 7 dinners containing dairy were followed by an overwhelmed check-in within 3 hours — the strongest pattern in your data so far, though the sample is still small.',
+      chips: ['Aug 27 dinner', 'Aug 30 snack', 'Based on 7 similar meals'] },
+  };
+  function renderPatternMatch(key){
+    const f = patternExamples[key];
+    const el = document.getElementById('patternContent');
+    el.innerHTML = '<span class="pattern-badge ' + f.badge + '">' + f.label + '</span>' +
+      '<h3 style="margin-top:0;">' + f.headline + '</h3><p>' + f.body + '</p>' +
+      '<div class="pattern-based-on">' + f.chips.map(c => '<span class="pattern-chip">' + c + '</span>').join('') + '</div>';
+  }
+  const patternToggle = document.getElementById('patternToggle');
+  if(patternToggle){
+    patternToggle.addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if(!btn) return;
+      patternToggle.querySelectorAll('button').forEach(b => b.classList.toggle('sel', b === btn));
+      renderPatternMatch(btn.dataset.pattern);
+    });
+    renderPatternMatch('low');
+  }
+
+  // coaches screener
+  function toggleScreener(){
+    const block = document.getElementById('screenerBlock');
+    const showing = block.style.display !== 'none';
+    block.style.display = showing ? 'none' : 'block';
+    document.getElementById('startScreenerBtn').textContent = showing ? 'Take the 2-minute screener' : 'Hide screener';
+  }
+  function showScreenerResult(){ document.getElementById('screenerResult').style.display = 'block'; }
+
+  // chat
+  function timeNow(){
+    const d = new Date();
+    let h = d.getHours() % 12; if(h === 0) h = 12;
+    const m = d.getMinutes().toString().padStart(2,'0');
+    return h + ':' + m + (d.getHours() >= 12 ? 'p' : 'a');
+  }
+  function appendMsg(text, cls){
+    const log = document.getElementById('chatLog');
+    const div = document.createElement('div');
+    div.className = 'msg ' + cls;
+    div.innerHTML = text + '<div class="msg-time">' + timeNow() + '</div>';
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+  const botReplies = {
+    'Log a meal': "Sure — tell me what you had, or snap a photo and I'll take it from there.",
+    '📷 Send a photo': "Go ahead and send a photo whenever you're ready — I'll identify what's on the plate and log it.",
+    "I'm feeling...": "I'm listening — however you're feeling is fine to share.",
+    'Log a supplement': "Which supplement, and what dose? I'll add it to today's log.",
+  };
+  function quickReply(text){
+    appendMsg(text, 'user');
+    setTimeout(() => appendMsg(botReplies[text] || "Got it, logged that.", 'bot'), 500);
+  }
+  function sendChat(){
+    const input = document.getElementById('chatInput');
+    const val = input.value.trim();
+    if(!val) return;
+    appendMsg(val, 'user');
+    input.value = '';
+    setTimeout(() => appendMsg("Got it — logged. Thanks for telling me.", 'bot'), 500);
+  }
+  document.getElementById('chatInput').addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') sendChat();
+  });
+
+  // onboarding
+  let obStep = 1;
+  const obTotalSteps = 3;
+  const obState = { context: null };
+
+  function obSelect(btn){
+    const group = btn.dataset.group;
+    document.querySelectorAll('.ob-option[data-group="' + group + '"]').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    obState.context = btn.textContent.trim();
+    document.getElementById('obNext').disabled = false;
+  }
+
+  function skipScreener(){
+    document.getElementById('obScreenerQs').style.display = 'none';
+    document.querySelector('#onboarding .ob-skip').style.display = 'none';
+    finishOnboarding();
+  }
+
+  function obRenderDots(){
+    document.querySelectorAll('#obDots span').forEach((d, i) => d.classList.toggle('on', i === obStep - 1));
+  }
+
+  document.querySelectorAll('#obScreenerQs .seg').forEach(seg => {
+    seg.addEventListener('click', () => {
+      document.getElementById('obNext').textContent = 'See what this suggests';
+    });
+  });
+
+  function obGo(dir){
+    if(dir > 0 && obStep === obTotalSteps){
+      if(document.getElementById('obScreenerResult').style.display === 'none'){
+        document.getElementById('obScreenerResult').style.display = 'block';
+        document.getElementById('obNext').textContent = 'Finish';
+        return;
+      }
+      finishOnboarding();
+      return;
+    }
+    obStep += dir;
+    document.querySelectorAll('.ob-step').forEach(s => s.classList.toggle('active', Number(s.dataset.step) === obStep));
+    document.getElementById('obBack').style.display = obStep === 1 ? 'none' : 'block';
+    const nextBtn = document.getElementById('obNext');
+    nextBtn.textContent = obStep === obTotalSteps ? 'See what this suggests' : 'Continue';
+    nextBtn.disabled = false;
+    obRenderDots();
+  }
+
+  function finishOnboarding(){
+    document.getElementById('onboarding').style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
