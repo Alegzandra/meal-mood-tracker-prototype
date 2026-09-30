@@ -14,7 +14,7 @@ storage in either prototype. Everything is mocked in the browser.
 
 ## 1. Family version — child + caregiver
 
-**[Live demo →](index.html)**
+**[Live demo →](Alegzandra/https://alegzandra.github.io/meal-mood-tracker-prototype/)**
 
 A meal/mood tracker built around a young user and their caregiver, with age-based
 privacy: a caregiver sees everything for a minor's account by default, and the user
@@ -40,7 +40,7 @@ that automatically.
 
 ## 2. Aria — for autistic adults
 
-**[Live demo →](aria.html)**
+**[Live demo →](https://alegzandra.github.io/meal-mood-tracker-prototype/aria.html)**
 
 A standalone, self-directed version built for autistic adults with lower support
 needs. The centerpiece is Aria, a conversational assistant: tell it what you ate, what
