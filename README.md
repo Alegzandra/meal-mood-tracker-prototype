@@ -14,7 +14,7 @@ storage in either prototype. Everything is mocked in the browser.
 
 ## 1. Family version — child + caregiver
 
-**[Live demo →](Alegzandra/https://alegzandra.github.io/meal-mood-tracker-prototype/)**
+**[Live demo →](https://alegzandra.github.io/meal-mood-tracker-prototype/)**
 
 A meal/mood tracker built around a young user and their caregiver, with age-based
 privacy: a caregiver sees everything for a minor's account by default, and the user
